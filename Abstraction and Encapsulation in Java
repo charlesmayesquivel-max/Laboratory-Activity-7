@@ -1,0 +1,118 @@
+import java.util.ArrayList;
+import java.util.Iterator;
+
+// ===== Task 2: Enum =====
+enum OrderStatus {
+    PENDING,
+    PAID,
+    SHIPPED,
+    CANCELLED
+}
+
+// ===== Task 3: Abstract Class =====
+abstract class Order {
+    private int orderId;
+    private double amount;
+    private OrderStatus status;
+
+    public Order(int orderId, double amount) {
+        this.orderId = orderId;
+        setAmount(amount); // validation applied
+        this.status = OrderStatus.PENDING;
+    }
+
+    public abstract void processOrder();
+
+    public String getOrderSummary() {
+        return "Order ID: " + orderId +
+               ", Amount: " + amount +
+               ", Status: " + status;
+    }
+
+    // Getters
+    public int getOrderId() { return orderId; }
+    public double getAmount() { return amount; }
+    public OrderStatus getStatus() { return status; }
+
+    // Setter with validation
+    public void setAmount(double amount) {
+        if (amount >= 0) {
+            this.amount = amount;
+        } else {
+            System.out.println("Invalid amount. Must be non-negative.");
+        }
+    }
+
+    // Protected setter for status (encapsulation)
+    protected void setStatus(OrderStatus status) {
+        this.status = status;
+    }
+}
+
+// ===== Task 4: Interface =====
+interface Payable {
+    void pay();
+}
+
+// ===== Task 5 & 6: Concrete Class =====
+class OnlineOrder extends Order implements Payable {
+    public OnlineOrder(int orderId, double amount) {
+        super(orderId, amount);
+    }
+
+    @Override
+    public void processOrder() {
+        System.out.println("Processing online order with ID: " + getOrderId());
+    }
+
+    @Override
+    public void pay() {
+        setStatus(OrderStatus.PAID);
+        System.out.println("Order ID " + getOrderId() + " has been paid.");
+    }
+}
+
+// ===== Task 7 & 8: Main Application =====
+public class SingleFileOrderApp {
+    public static void main(String[] args) {
+        ArrayList<Order> orders = new ArrayList<>();
+
+        // Add at least three OnlineOrder objects
+        OnlineOrder order1 = new OnlineOrder(101, 500.0);
+        OnlineOrder order2 = new OnlineOrder(102, 1200.0);
+        OnlineOrder order3 = new OnlineOrder(103, 800.0);
+
+        orders.add(order1);
+        orders.add(order2);
+        orders.add(order3);
+
+        // Process and pay some orders
+        order1.processOrder();
+        order1.pay();
+
+        order2.processOrder();
+        order2.pay();
+
+        order3.processOrder();
+        order3.pay();
+        order3.setStatus(OrderStatus.CANCELLED); // simulate cancellation
+
+        // Traverse using Iterator
+        Iterator<Order> iterator = orders.iterator();
+        while (iterator.hasNext()) {
+            Order order = iterator.next();
+            System.out.println(order.getOrderSummary());
+
+            if (order.getStatus() == OrderStatus.CANCELLED) {
+                iterator.remove();
+                System.out.println("Removed cancelled order: " + order.getOrderId());
+            }
+        }
+
+        // Final list of orders
+        System.out.println("\nFinal Orders:");
+        for (Order order : orders) {
+            System.out.println(order.getOrderSummary());
+        }
+    }
+}
